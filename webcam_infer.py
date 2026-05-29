@@ -9,12 +9,7 @@ import torch.nn as nn
 from PIL import Image
 from torchvision import models
 
-
-GRADE_LABEL_MAP = {
-    "S": "하",
-    "M": "중",
-    "L": "상"
-}
+GRADE_LABEL_MAP = {"S": "하", "M": "중", "L": "상"}
 
 
 def split_class_name(class_name: str) -> tuple[str, str | None, str | None]:
@@ -85,17 +80,37 @@ def draw_result(frame, result: dict, fps: float | None = None):
 
     y = 30
     for text in lines:
-        cv2.putText(frame, text, (20, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (30, 255, 30), 2, cv2.LINE_AA)
+        cv2.putText(
+            frame,
+            text,
+            (20, y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (30, 255, 30),
+            2,
+            cv2.LINE_AA,
+        )
         y += 30
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Real-time fruit grade inference from webcam")
-    parser.add_argument("--checkpoint", type=str, default="fruit_grade_resnet18.pth", help="Model checkpoint path")
-    parser.add_argument("--camera-id", type=int, default=0, help="Webcam index (default: 0)")
+    parser = argparse.ArgumentParser(
+        description="Real-time fruit grade inference from webcam"
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="fruit_grade_resnet18.pth",
+        help="Model checkpoint path",
+    )
+    parser.add_argument(
+        "--camera-id", type=int, default=0, help="Webcam index (default: 0)"
+    )
     parser.add_argument("--width", type=int, default=1280, help="Capture width")
     parser.add_argument("--height", type=int, default=720, help="Capture height")
-    parser.add_argument("--infer-every", type=int, default=3, help="Run model every N frames for speed")
+    parser.add_argument(
+        "--infer-every", type=int, default=3, help="Run model every N frames for speed"
+    )
     return parser.parse_args()
 
 
@@ -109,7 +124,9 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
 
     if not cap.isOpened():
-        raise RuntimeError("Cannot open webcam. Check --camera-id or camera permissions.")
+        raise RuntimeError(
+            "Cannot open webcam. Check --camera-id or camera permissions."
+        )
 
     print("Webcam started. Press Q to quit.")
 
@@ -127,7 +144,11 @@ def main():
             last_result = predictor.predict_frame(frame)
 
         curr_tick = cv2.getTickCount()
-        fps = cv2.getTickFrequency() / (curr_tick - prev_tick) if curr_tick != prev_tick else 0.0
+        fps = (
+            cv2.getTickFrequency() / (curr_tick - prev_tick)
+            if curr_tick != prev_tick
+            else 0.0
+        )
         prev_tick = curr_tick
 
         if last_result is not None:

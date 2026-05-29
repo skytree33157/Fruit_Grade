@@ -1,0 +1,6 @@
+pytest
+ruff
+mypy
+detect-secrets
+python-dotenv
+httpx

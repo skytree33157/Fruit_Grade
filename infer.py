@@ -8,12 +8,7 @@ import torch.nn as nn
 from PIL import Image
 from torchvision import models
 
-
-GRADE_LABEL_MAP = {
-    "S": "하",
-    "M": "중",
-    "L": "상"
-}
+GRADE_LABEL_MAP = {"S": "하", "M": "중", "L": "상"}
 
 
 def split_class_name(class_name: str) -> tuple[str, str | None, str | None]:
@@ -30,7 +25,9 @@ def split_class_name(class_name: str) -> tuple[str, str | None, str | None]:
 
 
 @torch.no_grad()
-def predict_image(image_path: str, checkpoint_path: str = "fruit_grade_resnet18.pth") -> dict:
+def predict_image(
+    image_path: str, checkpoint_path: str = "fruit_grade_resnet18.pth"
+) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     ckpt_path = Path(checkpoint_path)
@@ -74,7 +71,9 @@ def predict_image(image_path: str, checkpoint_path: str = "fruit_grade_resnet18.
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Infer fruit name and grade from one image")
+    parser = argparse.ArgumentParser(
+        description="Infer fruit name and grade from one image"
+    )
     parser.add_argument("--image", required=True, type=str, help="Input image path")
     parser.add_argument(
         "--checkpoint",

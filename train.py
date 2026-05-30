@@ -23,11 +23,7 @@ class ZipSample:
     class_name: str
 
 
-GRADE_LABEL_MAP = {
-    "S": "하",
-    "M": "중",
-    "L": "상"
-}
+GRADE_LABEL_MAP = {"S": "하", "M": "중", "L": "상"}
 
 
 def split_class_name(class_name: str) -> tuple[str, str | None, str | None]:
@@ -69,7 +65,11 @@ def discover_zip_samples(source_dir: Path) -> list[ZipSample]:
                     if member_lower.endswith("/"):
                         continue
                     if any(member_lower.endswith(ext) for ext in allowed_exts):
-                        samples.append(ZipSample(zip_path=zf, inner_path=member, class_name=class_name))
+                        samples.append(
+                            ZipSample(
+                                zip_path=zf, inner_path=member, class_name=class_name
+                            )
+                        )
         except (zipfile.BadZipFile, OSError) as exc:
             skipped_files.append((zf.name, str(exc)))
             continue
@@ -78,7 +78,9 @@ def discover_zip_samples(source_dir: Path) -> list[ZipSample]:
         raise RuntimeError(f"No image files found in zipped data: {source_dir}")
 
     if skipped_files:
-        print(f"Warning: skipped {len(skipped_files)} invalid zip file(s) in {source_dir}")
+        print(
+            f"Warning: skipped {len(skipped_files)} invalid zip file(s) in {source_dir}"
+        )
         preview_count = min(10, len(skipped_files))
         for file_name, reason in skipped_files[:preview_count]:
             print(f" - {file_name}: {reason}")
@@ -154,7 +156,9 @@ def evaluate(model, loader, criterion, device):
 
     avg_loss = total_loss / max(total, 1)
     acc = correct / max(total, 1)
-    precision = precision_score(true_labels, pred_labels, average="macro", zero_division=0)
+    precision = precision_score(
+        true_labels, pred_labels, average="macro", zero_division=0
+    )
     recall = recall_score(true_labels, pred_labels, average="macro", zero_division=0)
     f1 = f1_score(true_labels, pred_labels, average="macro", zero_division=0)
     return avg_loss, acc, precision, recall, f1
@@ -185,7 +189,9 @@ def train(args):
     print("Indexing validation zip files...")
     val_samples = discover_zip_samples(val_source)
 
-    all_classes = sorted({s.class_name for s in train_samples} | {s.class_name for s in val_samples})
+    all_classes = sorted(
+        {s.class_name for s in train_samples} | {s.class_name for s in val_samples}
+    )
     class_to_idx = {name: i for i, name in enumerate(all_classes)}
     num_classes = len(all_classes)
 
@@ -292,7 +298,9 @@ def train(args):
                 "image_transform": "ResNet18_Weights.DEFAULT.transforms()",
             }
             torch.save(checkpoint, save_path)
-            print(f"Best model saved to: {save_path} (Val Acc: {best_val_acc * 100:.2f}%)")
+            print(
+                f"Best model saved to: {save_path} (Val Acc: {best_val_acc * 100:.2f}%)"
+            )
 
     print("Training done")
 
@@ -332,7 +340,9 @@ def predict_image(image_path: str, checkpoint_path: str = "fruit_grade_resnet18.
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Train fruit-grade classifier with QC zip dataset")
+    parser = argparse.ArgumentParser(
+        description="Train fruit-grade classifier with QC zip dataset"
+    )
     parser.add_argument(
         "--data-root",
         type=str,

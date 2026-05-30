@@ -4,13 +4,16 @@ import argparse
 import tempfile
 from datetime import datetime
 from pathlib import Path
+
 import cv2
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
 
 
-def draw_boxes(image: np.ndarray, boxes, scores, classes, names, conf_threshold: float = 0.25):
+def draw_boxes(
+    image: np.ndarray, boxes, scores, classes, names, conf_threshold: float = 0.25
+):
     h, w = image.shape[:2]
     for xyxy, conf, cls in zip(boxes, scores, classes):
         x1, y1, x2, y2 = map(int, xyxy)
@@ -18,8 +21,18 @@ def draw_boxes(image: np.ndarray, boxes, scores, classes, names, conf_threshold:
         color = (255, 0, 0)
         cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
         t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)[0]
-        cv2.rectangle(image, (x1, y1 - t_size[1] - 6), (x1 + t_size[0] + 6, y1), color, -1)
-        cv2.putText(image, label, (x1 + 3, y1 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+        cv2.rectangle(
+            image, (x1, y1 - t_size[1] - 6), (x1 + t_size[0] + 6, y1), color, -1
+        )
+        cv2.putText(
+            image,
+            label,
+            (x1 + 3, y1 - 4),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (255, 255, 255),
+            1,
+        )
     return image
 
 
@@ -32,7 +45,9 @@ def resolve_model_path(model_path: str) -> str:
     if path.name == model_path and path.suffix == ".pt" and path.parent == Path("."):
         return model_path
 
-    candidates = list(Path("runs").glob("**/weights/best.pt")) + list(Path("runs").glob("**/weights/last.pt"))
+    candidates = list(Path("runs").glob("**/weights/best.pt")) + list(
+        Path("runs").glob("**/weights/last.pt")
+    )
     if candidates:
         candidates.sort(key=lambda item: item.stat().st_mtime, reverse=True)
         chosen = candidates[0]
@@ -51,7 +66,21 @@ def normalize_source(source: str) -> str:
     if not source_path.exists() or source_path.is_dir():
         return source
 
-    supported_exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff", ".gif", ".mp4", ".avi", ".mov", ".mkv", ".webm"}
+    supported_exts = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".bmp",
+        ".webp",
+        ".tif",
+        ".tiff",
+        ".gif",
+        ".mp4",
+        ".avi",
+        ".mov",
+        ".mkv",
+        ".webm",
+    }
     if source_path.suffix.lower() in supported_exts:
         return source
 
@@ -94,9 +123,18 @@ def run_inference(model_path: str, source: str, conf: float, iou: float, save_di
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run YOLOv8 detection and save images with boxes")
-    parser.add_argument("--model", type=str, default="yolov8n.pt", help="Path to trained model or base model")
-    parser.add_argument("--source", type=str, required=True, help="Image file, folder, or webcam (0)")
+    parser = argparse.ArgumentParser(
+        description="Run YOLOv8 detection and save images with boxes"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="yolov8n.pt",
+        help="Path to trained model or base model",
+    )
+    parser.add_argument(
+        "--source", type=str, required=True, help="Image file, folder, or webcam (0)"
+    )
     parser.add_argument("--conf", type=float, default=0.25)
     parser.add_argument("--iou", type=float, default=0.45)
     parser.add_argument("--save-dir", type=str, default="runs/detect")

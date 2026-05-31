@@ -114,6 +114,15 @@ def _get_openai_recipe(ingredient: str) -> dict:
     return RecipeResponse(**data).model_dump()
 
 
+def _get_mock_recipe(ingredient: str) -> dict:
+    sample = {
+        "title": f"{ingredient} 볶음 (샘플)",
+        "ingredients": [f"{ingredient} 200g", "소금 1t", "후추 약간"],
+        "steps": ["재료 손질", "팬에 볶기", "간 맞추기"],
+    }
+    return RecipeResponse(**sample).model_dump()
+
+
 def get_recipe(ingredient: str, *, retries: int = 2, backoff: float = 0.5) -> dict:
     provider = settings.LLM_PROVIDER.lower() if settings.LLM_PROVIDER else "mock"
 
@@ -122,12 +131,7 @@ def get_recipe(ingredient: str, *, retries: int = 2, backoff: float = 0.5) -> di
         for attempt in range(1, retries + 1):
             try:
                 return _get_gemini_recipe(ingredient)
-            except (
-                ValueError,
-                json.JSONDecodeError,
-                ValidationError,
-                AttributeError,
-            ) as exc:
+            except Exception as exc:
                 last_err = exc
                 if attempt < retries:
                     time.sleep(backoff * attempt)
@@ -142,12 +146,7 @@ def get_recipe(ingredient: str, *, retries: int = 2, backoff: float = 0.5) -> di
         for attempt in range(1, retries + 1):
             try:
                 return _get_openai_recipe(ingredient)
-            except (
-                ValueError,
-                json.JSONDecodeError,
-                ValidationError,
-                AttributeError,
-            ) as exc:
+            except Exception as exc:
                 last_err = exc
                 if attempt < retries:
                     time.sleep(backoff * attempt)
@@ -158,10 +157,4 @@ def get_recipe(ingredient: str, *, retries: int = 2, backoff: float = 0.5) -> di
             raise last_err
 
     # default/mock provider
-    sample = {
-        "title": f"{ingredient} 볶음 (샘플)",
-        "ingredients": [f"{ingredient} 200g", "소금 1t", "후추 약간"],
-        "steps": ["재료 손질", "팬에 볶기", "간 맞추기"],
-    }
-    # ensure it validates
-    return RecipeResponse(**sample).model_dump()
+    return _get_mock_recipe(ingredient)

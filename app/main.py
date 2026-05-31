@@ -39,13 +39,17 @@ def create_app() -> FastAPI:
         return FileResponse(STATIC_DIR / "index.html")
 
     from app.routes.analyze import router as analyze_router
+    from app.routes.auth import router as auth_router
     from app.routes.classify import router as classify_router
     from app.routes.detect import router as detect_router
+    from app.routes.me import router as me_router
     from app.routes.recipe import router as recipe_router
 
     app.include_router(detect_router, prefix="/api")
     app.include_router(classify_router, prefix="/api")
     app.include_router(analyze_router, prefix="/api")
+    app.include_router(auth_router, prefix="/api")
+    app.include_router(me_router, prefix="/api")
     app.include_router(recipe_router, prefix="/api")
 
     @app.exception_handler(HTTPException)

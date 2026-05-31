@@ -17,6 +17,8 @@ class Settings:
     RESNET_CHECKPOINT: str = os.getenv("RESNET_CHECKPOINT", "fruit_grade_resnet18.pth")
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "gemini")
     LLM_API_KEY: str | None = os.getenv("LLM_API_KEY")
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+    LLM_TIMEOUT: int = int(os.getenv("LLM_TIMEOUT", "10"))
     DEVICE: str | None = os.getenv("DEVICE")
 
 

@@ -2,7 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>FreshCheck</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreshCheck Demo</title>
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body class="theme-dark">
@@ -131,6 +132,18 @@
       </div>
       <div id="recipeSection" class="recipe-section hidden"></div>
     </section>
+  </div>
+
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+
+  <div id="fabContainer" class="fab-container">
+    <button id="fabMain" class="fab-main" aria-label="menu">
+      <span class="fab-icon">≡</span>
+    </button>
+    <div id="fabActions" class="fab-actions hidden">
+      <button id="fabCamera" class="fab-action fab-camera" aria-label="camera">📷</button>
+      <button id="fabFolder" class="fab-action fab-folder" aria-label="folder">📁</button>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>

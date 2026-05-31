@@ -297,6 +297,11 @@ canvas {
   display: none !important;
 }
 
+/* Hide FAB by default; shown only on small screens */
+.fab-container {
+  display: none;
+}
+
 #modal {
   position: fixed;
   inset: 0;
@@ -539,5 +544,63 @@ canvas {
   .auth-status {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* Floating action button container */
+  .fab-container {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 1400;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fab-main {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    background: white;
+    color: black;
+    font-size: 28px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    border: 0;
+  }
+
+  .fab-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .fab-action {
+    width: 60px;
+    height: 60px;
+    border-radius: 999px;
+    background: white;
+    color: black;
+    font-size: 22px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+  }
+
+  /* Hide default uploader file selector on mobile; use FAB instead */
+  .uploader input[type="file"] {
+    display: none;
+  }
+  .uploader input[type="file"]::file-selector-button {
+    display: none;
+  }
+
+  /* Ensure upload button remains visible and centered */
+  .uploader {
+    justify-content: flex-start;
   }
 }

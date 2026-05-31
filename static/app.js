@@ -42,11 +42,17 @@ const openSignupBtn = document.getElementById("openSignupBtn");
 const openLoginBtn = document.getElementById("openLoginBtn");
 const signupForm = document.getElementById("signupForm");
 const loginForm = document.getElementById("loginForm");
+const cameraInput = document.getElementById("cameraInput");
+const fabMain = document.getElementById("fabMain");
+const fabActions = document.getElementById("fabActions");
+const fabCamera = document.getElementById("fabCamera");
+const fabFolder = document.getElementById("fabFolder");
 const signupUsername = document.getElementById("signupUsername");
 const signupPassword = document.getElementById("signupPassword");
 const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
-const logoutBtn = document.getElementById("logoutBtn");
+
+const API_KEY_STORAGE_KEY = "freshcheck.apiKey";
 
 let currentUser = null;
 let sessionToken = localStorage.getItem(SESSION_TOKEN_KEY) || "";
@@ -55,21 +61,20 @@ let currentRecipeMode = "local";
 let activeSavedRecipeId = null;
 let authPanelOpen = false;
 let authViewMode = "login";
-const API_KEY_STORAGE_KEY = "freshcheck.apiKey";
 
 const tipsByCrop = {
   apple: "1. 표면의 색이 맑고 밝은 것<br>2. 꼭지가 마르지 않고 푸른색을 띠는 것",
   potato: "1. 표면에 흠집이 없고 매끄러우며 단단한 것<br>2. 껍질에 녹색 빛이 돌거나 싹이 난 건 피하기",
-  cabbage: "1. 겉잎이 연한 녹색을 띠고 윤기가 난 것<br>2. 었을 때 묵직하고 속이 꽉 찬 것<br>3. 밑동을 잘라낸 단면이 하얗고 마르지 않은 것",
+  cabbage: "1. 겉잎이 연한 녹색을 띠고 윤기가 난 것<br>2. 들었을 때 묵직하고 속이 꽉 찬 것<br>3. 밑동을 잘라낸 단면이 하얗고 마르지 않은 것",
   onion_white: "1. 껍질이 얇고 바스락거리는 것<br>2. 만졌을 때 단단하고 윗부분과 뿌리 부분이 단단하고 싹이 나지 않은 것",
   onion_red: "1. 껍질이 얇고 바스락거리는 것<br>2. 만졌을 때 단단하고 윗부분과 뿌리 부분이 단단하고 싹이 나지 않은 것",
   garlic: "1. 알이 굵고 끝이 뾰족하며, 만졌을 때 빈 곳 없이 단단하고 묵직한 것<br>2. 겉껍질이 얇게 잘 마르고 연한 붉은 빛을 띠는 것<br>3. 싹이 난 건 피하기",
   onjumilgam: "1. 껍질이 얇고 만졌을 때 단단하며 묵직한 것<br>2. 꼭지가 작고 연한 녹색을 띠는 것",
-  hallabong:"1. 껍질이 얇고 크기에 비해 묵직한 것<br>2. 껍질이 주름진 건 피하고, 꼭지 부분이 싱싱한 것 택하기",
-  persimmon:"1. 표면에 흠집이 없고 윤기가 난 것<br>2. 전체적으로 색이 고르게 짙은 주황색을 띠는 것<br>3. 꼭지가 과육에 딱 달라붙어 있는 것",
-  pear:"1. 껍질이 팽팽하고 크기에 비해 묵직한 것<br>2. 표면이 맑은 황갈색인 것<br>3. 배꼽 부분이 넓고 깊게 쑥 들어간 것",
-  chinese_cabbage:"1. 들었을 때 묵직하고 속이 꽉 찬 것<br>2. 겉잎은 짙은 녹색, 속잎은 뚜렷한 노란색인 것",
-  radish:"1. 모양이 반듯하게 곧고 잔뿌리가 적은 것<br>2. 표면이 흠집 없이 매끄러운 것<br>3. 위와 아래의 경계가 뚜렷한 것"
+  hallabong: "1. 껍질이 얇고 크기에 비해 묵직한 것<br>2. 껍질이 주름진 건 피하고, 꼭지 부분이 싱싱한 것 택하기",
+  persimmon: "1. 표면에 흠집이 없고 윤기가 난 것<br>2. 전체적으로 색이 고르게 짙은 주황색을 띠는 것<br>3. 꼭지가 과육에 딱 달라붙어 있는 것",
+  pear: "1. 껍질이 팽팽하고 크기에 비해 묵직한 것<br>2. 표면이 맑은 황갈색인 것<br>3. 배꼽 부분이 넓고 깊게 쑥 들어간 것",
+  chinese_cabbage: "1. 들었을 때 묵직하고 속이 꽉 찬 것<br>2. 겉잎은 짙은 녹색, 속잎은 뚜렷한 노란색인 것",
+  radish: "1. 모양이 반듯하게 곧고 잔뿌리가 적은 것<br>2. 표면이 흠집 없이 매끄러운 것<br>3. 위와 아래의 경계가 뚜렷한 것",
 };
 
 const displayNameMap = {
@@ -96,6 +101,7 @@ function displayCropName(rawName) {
     .replace(/[^a-z0-9_]/g, "");
   return displayNameMap[key] || rawName;
 }
+
 let analyzedItems = [];
 let activeItem = null;
 let activeRecipe = null;
@@ -104,6 +110,70 @@ let canvasState = {
   scaleX: 1,
   scaleY: 1,
 };
+
+async function analyzeFile(file) {
+  setStatus("Analyzing...");
+  setCanvasHint("이미지 분석 중...");
+
+  const form = new FormData();
+  form.append("image", file);
+
+  let res;
+  try {
+    res = await fetch("/api/analyze", { method: "POST", body: form });
+  } catch (e) {
+    setStatus("분석 실패");
+    setCanvasHint("이미지 분석에 실패했습니다.");
+    return;
+  }
+
+  if (!res.ok) {
+    setStatus("분석 실패");
+    setCanvasHint("이미지 분석에 실패했습니다.");
+    return;
+  }
+
+  const data = await res.json();
+  analyzedItems = data.items || [];
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = rect.width || img.width;
+    const displayHeight = rect.height || img.height;
+
+    canvasState.scaleX = img.width / displayWidth;
+    canvasState.scaleY = img.height / displayHeight;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    ctx.font = "16px Arial";
+
+    analyzedItems.forEach((item) => {
+      const b = item.bbox;
+      ctx.strokeStyle = "lime";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+      const rawName = item.crop_name || item.detector_class_name;
+      const displayName = displayCropName(rawName);
+      const label = item.grade ? `${displayName} / ${item.grade || "?"}` : displayName;
+      const labelWidth = ctx.measureText(label).width + 10;
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillRect(b.x, Math.max(0, b.y - 20), labelWidth, 20);
+      ctx.fillStyle = "white";
+      ctx.fillText(label, b.x + 5, Math.max(15, b.y - 5));
+    });
+
+    setStatus(`${analyzedItems.length} items`);
+    setCanvasHint("박스를 클릭하세요.");
+  };
+  img.src = url;
+}
 
 function normalizeRecipeRecord(recipe) {
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
@@ -447,8 +517,8 @@ function openModal(item) {
   modal.classList.remove("hidden");
   recipeSection.classList.add("hidden");
 
-  const title = displayCropName(item.crop_name || item.detector_class_name) || "Unknown crop";
-  modalTitle.textContent = title;
+  const rawTitle = item.crop_name || item.detector_class_name || "Unknown crop";
+  modalTitle.textContent = rawTitle;
 
   const confidence = Number(item.grade_confidence || 0);
   modalContent.innerHTML = `
@@ -783,6 +853,41 @@ openLoginBtn.addEventListener("click", () => showAuthView("login"));
 backToHomeBtn.addEventListener("click", showHomeView);
 closeModal.addEventListener("click", closeModalView);
 modalBackdrop.addEventListener("click", closeModalView);
+
+// Floating action button behavior (mobile)
+if (fabMain) {
+  fabMain.addEventListener("click", () => {
+    if (!fabActions) return;
+    fabActions.classList.toggle("hidden");
+  });
+}
+
+if (fabCamera) {
+  fabCamera.addEventListener("click", () => {
+    if (!cameraInput) return;
+    cameraInput.value = null;
+    cameraInput.click();
+  });
+}
+
+if (cameraInput) {
+  cameraInput.addEventListener("change", async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    // close FAB actions after action
+    if (fabActions) fabActions.classList.add("hidden");
+    await analyzeFile(file);
+  });
+}
+
+if (fabFolder) {
+  fabFolder.addEventListener("click", () => {
+    // trigger existing file input (folder picker)
+    if (!input) return;
+    input.click();
+    if (fabActions) fabActions.classList.add("hidden");
+  });
+}
 
 savedRecipes = loadSavedRecipes();
 localRecipes = savedRecipes.slice();

@@ -195,8 +195,8 @@ def train(args):
     class_to_idx = {name: i for i, name in enumerate(all_classes)}
     num_classes = len(all_classes)
 
-    weights = models.ResNet18_Weights.DEFAULT
-    model = models.resnet18(weights=weights)
+    weights = models.ResNet101_Weights.DEFAULT
+    model = models.resnet101(weights=weights)
     preprocess = weights.transforms()
 
     num_features = model.fc.in_features
@@ -293,9 +293,9 @@ def train(args):
                 "classes": all_classes,
                 "class_to_idx": class_to_idx,
                 "num_classes": num_classes,
-                "model_name": "resnet18",
-                "best_val_acc": best_val_acc,
-                "image_transform": "ResNet18_Weights.DEFAULT.transforms()",
+                    "model_name": "resnet101",
+                    "best_val_acc": best_val_acc,
+                    "image_transform": "ResNet101_Weights.DEFAULT.transforms()",
             }
             torch.save(checkpoint, save_path)
             print(
@@ -306,15 +306,15 @@ def train(args):
 
 
 @torch.no_grad()
-def predict_image(image_path: str, checkpoint_path: str = "fruit_grade_resnet18.pth"):
+def predict_image(image_path: str, checkpoint_path: str = "fruit_grade_resnet101.pth"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ckpt = torch.load(checkpoint_path, map_location=device)
 
     classes = ckpt["classes"]
     num_classes = ckpt["num_classes"]
 
-    weights = models.ResNet18_Weights.DEFAULT
-    model = models.resnet18(weights=None)
+    weights = models.ResNet101_Weights.DEFAULT
+    model = models.resnet101(weights=None)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     model.load_state_dict(ckpt["weights"])
     model = model.to(device)
@@ -360,7 +360,7 @@ def parse_args():
         help="Optional cap for number of images per class (useful when training quickly)",
     )
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--save-path", type=str, default="fruit_grade_resnet18.pth")
+    parser.add_argument("--save-path", type=str, default="fruit_grade_resnet101.pth")
     return parser.parse_args()
 
 

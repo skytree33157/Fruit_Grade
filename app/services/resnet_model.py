@@ -71,10 +71,10 @@ class ResNetPredictor:
         self.classes = ckpt["classes"]
         num_classes = ckpt["num_classes"]
 
-        self.weights = models.ResNet18_Weights.DEFAULT
+        self.weights = models.ResNet101_Weights.DEFAULT
         self.transform = self.weights.transforms()
 
-        self.model = models.resnet18(weights=None)
+        self.model = models.resnet101(weights=None)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
         self.model.load_state_dict(ckpt["weights"])
         self.model = self.model.to(self.device)

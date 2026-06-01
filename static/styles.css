@@ -466,6 +466,27 @@ canvas {
   margin-bottom: 10px;
 }
 
+.saved-recipe-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saved-recipe-clear-btn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(239, 68, 68, 0.28);
+}
+
+.saved-recipe-clear-btn:hover {
+  background: linear-gradient(135deg, #fb7185, #dc2626);
+}
+
 .saved-recipe-head h2 {
   margin: 0;
   font-size: 18px;
@@ -482,18 +503,71 @@ canvas {
 }
 
 .saved-recipe-item {
+  position: relative;
+  margin-top: 0;
+  padding-top: 0;
   width: 100%;
-  text-align: left;
+  box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 12px;
-  color: var(--text);
   background: rgba(255, 255, 255, 0.04);
-  cursor: pointer;
+  overflow: visible;
 }
 
 .saved-recipe-item:hover {
   border-color: rgba(103, 209, 255, 0.35);
+}
+
+.saved-recipe-item {
+  overflow: visible;
+}
+
+.saved-recipe-body {
+  width: 100%;
+  padding: 10px 56px 10px 12px;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.saved-recipe-delete {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  min-width: 56px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  transform: translateY(-50%);
+  box-shadow: 0 10px 22px rgba(239, 68, 68, 0.28);
+}
+
+.saved-recipe-delete:hover {
+  background: linear-gradient(135deg, #fb7185, #dc2626);
+}
+
+.saved-recipe-delete:active {
+  transform: translateY(-50%);
+}
+
+.saved-recipe-body:active {
+  transform: translateY(0);
+}
+
+.saved-recipe-body:hover {
+  opacity: 0.98;
 }
 
 .saved-recipe-title {

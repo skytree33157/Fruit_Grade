@@ -11,6 +11,8 @@ from app.schemas.saved_recipe import (
 )
 from app.services.user_store import (
     add_user_recipe,
+    clear_user_recipe_checklist,
+    delete_user_recipe,
     get_current_user,
     list_user_recipes,
     update_user_recipe_checklist,
@@ -40,5 +42,21 @@ async def update_recipe_checklist(
 ):
     try:
         return update_user_recipe_checklist(user["id"], recipe_id, payload.checklist_checked)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.delete("/recipes/{recipe_id}", status_code=204)
+async def delete_recipe(recipe_id: str, user: dict = Depends(get_current_user)):
+    try:
+        delete_user_recipe(user["id"], recipe_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.delete("/recipes/{recipe_id}/checklist", response_model=SavedRecipeResponse)
+async def clear_recipe_checklist(recipe_id: str, user: dict = Depends(get_current_user)):
+    try:
+        return clear_user_recipe_checklist(user["id"], recipe_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

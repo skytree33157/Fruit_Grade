@@ -196,6 +196,23 @@ function normalizeRecipeRecord(recipe) {
   };
 }
 
+function formatSavedRecipeTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value || "");
+  }
+
+  const pad2 = (num) => String(num).padStart(2, "0");
+  const year = String(date.getFullYear());
+  const month = pad2(date.getMonth() + 1);
+  const day = pad2(date.getDate());
+  const hours = pad2(date.getHours());
+  const minutes = pad2(date.getMinutes());
+  const seconds = pad2(date.getSeconds());
+
+  return `${year}.${month}.${day}_${hours}:${minutes}:${seconds}`;
+}
+
 function loadLocalRecipes() {
   try {
     const raw = localStorage.getItem(LOCAL_RECIPES_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -410,7 +427,9 @@ function renderAuthState() {
 }
 
 function setStatus(text) {
-  statusPill.textContent = text;
+  if (statusPill) {
+    statusPill.textContent = text;
+  }
 }
 
 function loadSavedRecipes() {
@@ -422,7 +441,9 @@ function saveSavedRecipes() {
 }
 
 function renderSavedRecipes() {
-  savedRecipeCount.textContent = String(savedRecipes.length);
+  if (savedRecipeCount) {
+    savedRecipeCount.textContent = String(savedRecipes.length);
+  }
 
   if (!savedRecipes.length) {
     savedRecipeEmpty.classList.remove("hidden");
@@ -431,16 +452,69 @@ function renderSavedRecipes() {
   }
 
   savedRecipeEmpty.classList.add("hidden");
-  savedRecipeList.innerHTML = savedRecipes
-    .map(
-      (recipe) => `
-        <button class="saved-recipe-item" data-recipe-id="${recipe.id}">
-          <div class="saved-recipe-title">${recipe.title}</div>
-          <div class="saved-recipe-sub">${displayCropName(recipe.ingredient)} · ${new Date(recipe.createdAt).toLocaleString()}</div>
-        </button>
-      `,
-    )
-    .join("");
+  savedRecipeList.innerHTML = "";
+
+  const fragment = document.createDocumentFragment();
+  savedRecipes.forEach((recipe) => {
+    const item = document.createElement("div");
+    item.className = "saved-recipe-item";
+    item.dataset.recipeId = recipe.id;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "saved-recipe-delete";
+    deleteButton.dataset.deleteRecipeId = recipe.id;
+    deleteButton.setAttribute("aria-label", `${recipe.title} 삭제`);
+    deleteButton.textContent = "삭제";
+
+    const bodyButton = document.createElement("button");
+    bodyButton.type = "button";
+    bodyButton.className = "saved-recipe-body";
+    bodyButton.dataset.openRecipeId = recipe.id;
+
+    const title = document.createElement("div");
+    title.className = "saved-recipe-title";
+    title.textContent = recipe.title;
+
+    const sub = document.createElement("div");
+    sub.className = "saved-recipe-sub";
+    sub.textContent = `${displayCropName(recipe.ingredient)} · ${formatSavedRecipeTimestamp(recipe.createdAt)}`;
+
+    bodyButton.append(title, sub);
+    item.append(deleteButton, bodyButton);
+    fragment.appendChild(item);
+  });
+
+  savedRecipeList.appendChild(fragment);
+}
+
+async function deleteSavedRecipe(recipeId) {
+  const target = savedRecipes.find((item) => item.id === recipeId);
+  if (!target) return;
+
+  const confirmed = window.confirm(`"${target.title}" 레시피를 삭제할까요?`);
+  if (!confirmed) return;
+
+  if (currentRecipeMode === "server") {
+    const response = await apiFetch(`/api/me/recipes/${recipeId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok && response.status !== 204) {
+      throw new Error("Failed to delete saved recipe");
+    }
+  } else {
+    localRecipes = localRecipes.filter((recipe) => recipe.id !== recipeId);
+    saveLocalRecipes();
+  }
+
+  savedRecipes = savedRecipes.filter((recipe) => recipe.id !== recipeId);
+  if (activeSavedRecipeId === recipeId) {
+    activeSavedRecipeId = null;
+    showHomeView();
+  }
+  renderSavedRecipes();
+  setStatus("레시피가 삭제되었습니다");
 }
 
 function showHomeView() {
@@ -691,9 +765,18 @@ canvas.addEventListener("click", (event) => {
 });
 
 savedRecipeList.addEventListener("click", (event) => {
-  const target = event.target.closest("[data-recipe-id]");
-  if (!target) return;
-  openSavedRecipe(target.dataset.recipeId);
+  const deleteTarget = event.target.closest("[data-delete-recipe-id]");
+  if (deleteTarget) {
+    const recipeId = deleteTarget.dataset.deleteRecipeId;
+    deleteSavedRecipe(recipeId).catch(() => {
+      setStatus("레시피 삭제에 실패했습니다");
+    });
+    return;
+  }
+
+  const openTarget = event.target.closest("[data-open-recipe-id]");
+  if (!openTarget) return;
+  openSavedRecipe(openTarget.dataset.openRecipeId);
 });
 
 uploadBtn.onclick = async () => {

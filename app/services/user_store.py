@@ -243,5 +243,37 @@ def update_user_recipe_checklist(
     raise ValueError("Saved recipe not found")
 
 
+def delete_user_recipe(user_id: str, recipe_id: str) -> None:
+    with _STORE_LOCK:
+        store = _load_store()
+        user = _find_user_by_id(store, user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        recipes = user.get("recipes", [])
+        original_count = len(recipes)
+        user["recipes"] = [recipe for recipe in recipes if recipe.get("id") != recipe_id]
+        if len(user["recipes"]) == original_count:
+            raise ValueError("Saved recipe not found")
+
+        _save_store(store)
+
+
+def clear_user_recipe_checklist(user_id: str, recipe_id: str) -> dict[str, Any]:
+    with _STORE_LOCK:
+        store = _load_store()
+        user = _find_user_by_id(store, user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        for recipe in user.get("recipes", []):
+            if recipe.get("id") == recipe_id:
+                recipe["checklist_checked"] = [False] * len(recipe.get("ingredients", []))
+                _save_store(store)
+                return deepcopy(recipe)
+
+    raise ValueError("Saved recipe not found")
+
+
 def clear_session(token: str) -> None:
     _SESSION_TOKENS.pop(token, None)

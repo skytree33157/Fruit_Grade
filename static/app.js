@@ -27,10 +27,10 @@ const detailRecipeMeta = document.getElementById("detailRecipeMeta");
 const detailChecklist = document.getElementById("detailChecklist");
 const detailSteps = document.getElementById("detailSteps");
 
-const LEGACY_STORAGE_KEY = "freshcheck.savedRecipes.v1";
-const LOCAL_RECIPES_KEY = "freshcheck.savedRecipes.local.v2";
-const SESSION_TOKEN_KEY = "freshcheck.sessionToken.v1";
-const SESSION_USER_KEY = "freshcheck.sessionUser.v1";
+const LEGACY_STORAGE_KEY = "fruitgrade.savedRecipes.v1";
+const LOCAL_RECIPES_KEY = "fruitgrade.savedRecipes.local.v2";
+const SESSION_TOKEN_KEY = "fruitgrade.sessionToken.v1";
+const SESSION_USER_KEY = "fruitgrade.sessionUser.v1";
 
 const authPanel = document.getElementById("authPanel");
 const loginView = document.getElementById("loginView");
@@ -52,7 +52,7 @@ const signupPassword = document.getElementById("signupPassword");
 const loginUsername = document.getElementById("loginUsername");
 const loginPassword = document.getElementById("loginPassword");
 
-const API_KEY_STORAGE_KEY = "freshcheck.apiKey";
+const API_KEY_STORAGE_KEY = "fruitgrade.apiKey";
 
 let currentUser = null;
 let sessionToken = localStorage.getItem(SESSION_TOKEN_KEY) || "";

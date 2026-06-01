@@ -1,4 +1,4 @@
-"""File-backed user store and session handling for FreshCheck."""
+"""File-backed user store and session handling for Fruit Grade."""
 
 from __future__ import annotations
 

@@ -24,7 +24,7 @@ def _error_payload(reason: str, details: dict | None = None) -> dict:
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="FreshCheck API")
+    app = FastAPI(title="Fruit Grade API")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

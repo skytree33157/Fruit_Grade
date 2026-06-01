@@ -192,8 +192,8 @@ def train(args):
 
     print(f"Indexed {len(train_files)} train images, {len(val_files)} val images, skipped {skipped} files")
 
-    weights = models.ResNet18_Weights.DEFAULT
-    model = models.resnet18(weights=weights)
+    weights = models.ResNet101_Weights.DEFAULT
+    model = models.resnet101(weights=weights)
     preprocess = weights.transforms()
 
     num_classes = len(classes)
@@ -266,9 +266,9 @@ def train(args):
                 "classes": classes,
                 "class_to_idx": {name: i for i, name in enumerate(classes)},
                 "num_classes": num_classes,
-                "model_name": "resnet18",
+                "model_name": "resnet101",
                 "best_val_acc": best_val_acc,
-                "image_transform": "ResNet18_Weights.DEFAULT.transforms()",
+                "image_transform": "ResNet101_Weights.DEFAULT.transforms()",
             }
             torch.save(checkpoint, save_path)
             print(f"Best model saved to: {save_path} (Val Acc: {best_val_acc*100:.2f}%)")
@@ -284,7 +284,7 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--save-path", type=str, default="crop_classifier_resnet18.pth")
+    parser.add_argument("--save-path", type=str, default="crop_classifier_resnet101.pth")
     return parser.parse_args()
 
 

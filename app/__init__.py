@@ -1,1 +1,1 @@
-"""FreshCheck application package."""
+"""Fruit Grade application package."""

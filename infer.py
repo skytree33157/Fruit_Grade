@@ -26,7 +26,7 @@ def split_class_name(class_name: str) -> tuple[str, str | None, str | None]:
 
 @torch.no_grad()
 def predict_image(
-    image_path: str, checkpoint_path: str = "fruit_grade_resnet18.pth"
+    image_path: str, checkpoint_path: str = "fruit_grade_resnet101.pth"
 ) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -43,8 +43,8 @@ def predict_image(
     classes = ckpt["classes"]
     num_classes = ckpt["num_classes"]
 
-    weights = models.ResNet18_Weights.DEFAULT
-    model = models.resnet18(weights=None)
+    weights = models.ResNet101_Weights.DEFAULT
+    model = models.resnet101(weights=None)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     model.load_state_dict(ckpt["weights"])
     model = model.to(device)
@@ -77,7 +77,7 @@ def parse_args():
     parser.add_argument("--image", required=True, type=str, help="Input image path")
     parser.add_argument(
         "--checkpoint",
-        default="fruit_grade_resnet18.pth",
+        default="fruit_grade_resnet101.pth",
         type=str,
         help="Trained checkpoint path",
     )

@@ -84,7 +84,7 @@ def normalize_source(source: str) -> str:
     if source_path.suffix.lower() in supported_exts:
         return source
 
-    temp_dir = Path(tempfile.gettempdir()) / "fresh_check_detect"
+    temp_dir = Path(tempfile.gettempdir()) / "fruit_grade_detect"
     temp_dir.mkdir(parents=True, exist_ok=True)
     temp_path = temp_dir / f"{source_path.stem}.png"
     Image.open(source_path).convert("RGB").save(temp_path)

@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fruit Grade Demo</title>
+  <link rel="stylesheet" href="/static/styles.css?v=20260601a" />
+</head>
+<body class="theme-dark">
+  <header class="header">
+    <div class="logo">Fruit Grade</div>
+    <div class="icons">
+      <button type="button" class="pill header-action" id="authToggleBtn">로그인</button>
+    </div>
+  </header>
+  <main class="main" id="homeView">
+    <section class="hero-card">
+      <h1>사진을 업로드하세요</h1>
+      <p>청과의 등급과 추천 레시피를 확인할 수 있습니다.</p>
+    </section>
+
+    <div id="uploader" class="uploader">
+      <input type="file" id="imageInput" accept="image/*" />
+      <button id="uploadBtn">검사하기</button>
+    </div>
+
+    <div id="canvasWrap">
+      <div id="canvasHint">이미지를 올리면 검출 박스가 표시됩니다.</div>
+      <canvas id="imageCanvas"></canvas>
+    </div>
+
+    <section id="savedRecipeWrap" class="saved-recipe-wrap">
+      <div class="saved-recipe-head">
+        <h2>레시피 리스트</h2>
+      </div>
+      <p id="savedRecipeEmpty" class="saved-recipe-empty">레시피가 비어있습니다.</p>
+      <div id="savedRecipeList" class="saved-recipe-list"></div>
+    </section>
+
+    <section class="auth-card auth-drawer hidden" id="authPanel">
+      <div class="auth-copy">
+        <!-- <h2>레시피와 체크리스트 저장</h2>
+        <p>로그인하거나 회원가입하면 확정한 레시피와 체크한 재료가 계정에 저장됩니다.</p> -->
+      </div>
+
+      <div class="auth-view" id="loginView">
+        <form class="auth-form" id="loginForm">
+          <h3>로그인</h3>
+          <!-- <p class="auth-hint">가입한 아이디와 비밀번호로 로그인하세요.</p> -->
+          <label>
+            <span>아이디</span>
+            <input id="loginUsername" type="text" autocomplete="username" placeholder="아이디" />
+          </label>
+          <label>
+            <span>비밀번호</span>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="비밀번호" />
+          </label>
+          <button type="submit" class="action-btn primary">로그인</button>
+        </form>
+
+        <div class="auth-footer">
+          <span>아직 계정이 없나요?</span>
+          <button type="button" id="openSignupBtn" class="action-btn secondary auth-switch-btn">회원가입</button>
+        </div>
+      </div>
+
+      <div class="auth-view hidden" id="signupView">
+        <form class="auth-form" id="signupForm">
+          <h3>회원가입</h3>
+          <!-- <p class="auth-hint">아이디와 비밀번호를 입력하세요. 비밀번호는 1자 이상이면 됩니다.</p> -->
+          <label>
+            <span>아이디</span>
+            <input id="signupUsername" type="text" autocomplete="username" placeholder="아이디" />
+          </label>
+          <label>
+            <span>비밀번호</span>
+            <input id="signupPassword" type="password" autocomplete="new-password" placeholder="비밀번호" />
+          </label>
+          <button type="submit" class="action-btn primary">회원가입</button>
+        </form>
+
+        <div class="auth-footer">
+          <span>이미 계정이 있나요?</span>
+          <button type="button" id="openLoginBtn" class="action-btn secondary auth-switch-btn">로그인</button>
+        </div>
+      </div>
+
+      <div class="auth-status hidden" id="authStatus">
+        <span id="authUserLabel"></span>
+        <button id="logoutBtn" class="action-btn secondary">로그아웃</button>
+      </div>
+
+      <p id="authMessage" class="auth-message"></p>
+    </section>
+  </main>
+
+  <main id="recipeDetailView" class="main hidden">
+    <section class="hero-card">
+      <button id="backToHomeBtn" class="action-btn secondary">← 홈으로 돌아가기</button>
+      <h1 id="detailRecipeTitle">레시피 상세</h1>
+      <p id="detailRecipeMeta">선택한 레시피의 재료와 조리 순서를 확인하세요.</p>
+    </section>
+
+    <section class="saved-recipe-wrap">
+      <h2>재료 체크리스트</h2>
+      <div id="detailChecklist" class="checklist-list"></div>
+    </section>
+
+    <section class="saved-recipe-wrap">
+      <h2>조리 순서</h2>
+      <ol id="detailSteps" class="detail-steps"></ol>
+    </section>
+  </main>
+
+  <div id="modal" class="hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <section class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <div class="modal-kicker">선택한 청과</div>
+          <h2 id="modalTitle">청과 정보</h2>
+        </div>
+        <button id="closeModal" class="icon-button">×</button>
+      </div>
+      <div id="modalContent" class="modal-content"></div>
+      <div class="modal-actions">
+        <button id="tipsBtn" class="action-btn secondary">팁</button>
+        <button id="recipeBtn" class="action-btn primary">추천 레시피</button>
+        <button id="confirmRecipeBtn" class="action-btn primary hidden">레시피 확정하기</button>
+      </div>
+      <div id="recipeSection" class="recipe-section hidden"></div>
+    </section>
+  </div>
+
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+
+  <div id="fabContainer" class="fab-container">
+    <button id="fabMain" class="fab-main" aria-label="menu">
+      <span class="fab-icon">≡</span>
+    </button>
+    <div id="fabActions" class="fab-actions hidden">
+      <button id="fabCamera" class="fab-action fab-camera" aria-label="camera">📷</button>
+      <button id="fabFolder" class="fab-action fab-folder" aria-label="folder">📁</button>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=20260601a"></script>
+</body>
+</html>

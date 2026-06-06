@@ -119,12 +119,12 @@ def _normalize_recipe_payload(payload: dict[str, Any]) -> dict[str, Any]:
 def register_user(username: str, password: str) -> dict[str, Any]:
     normalized = _normalize_username(username)
     if not normalized:
-        raise ValueError("Username is required")
+        raise ValueError("사용자 이름은 필수입니다")
 
     with _STORE_LOCK:
         store = _load_store()
         if _find_user(store, normalized):
-            raise ValueError("Username already exists")
+            raise ValueError("이미 존재하는 사용자 이름입니다")
 
         salt_hex, password_hash = _hash_password(password)
         user = {
@@ -149,9 +149,9 @@ def authenticate_user(username: str, password: str) -> dict[str, Any]:
         store = _load_store()
         user = _find_user(store, normalized)
         if not user:
-            raise ValueError("Invalid username or password")
+            raise ValueError("잘못된 사용자 이름 또는 비밀번호입니다")
         if not _verify_password(password, user["password_salt"], user["password_hash"]):
-            raise ValueError("Invalid username or password")
+            raise ValueError("잘못된 사용자 이름 또는 비밀번호입니다")
 
     token = secrets.token_urlsafe(32)
     _SESSION_TOKENS[token] = user["id"]
@@ -212,7 +212,7 @@ def add_user_recipe(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         store = _load_store()
         user = _find_user_by_id(store, user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("사용자를 찾을 수 없습니다")
 
         recipe = _normalize_recipe_payload(payload)
         user.setdefault("recipes", []).insert(0, recipe)
@@ -229,7 +229,7 @@ def update_user_recipe_checklist(
         store = _load_store()
         user = _find_user_by_id(store, user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("사용자를 찾을 수 없습니다")
 
         for recipe in user.get("recipes", []):
             if recipe.get("id") == recipe_id:
@@ -248,13 +248,13 @@ def delete_user_recipe(user_id: str, recipe_id: str) -> None:
         store = _load_store()
         user = _find_user_by_id(store, user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("사용자를 찾을 수 없습니다")
 
         recipes = user.get("recipes", [])
         original_count = len(recipes)
         user["recipes"] = [recipe for recipe in recipes if recipe.get("id") != recipe_id]
         if len(user["recipes"]) == original_count:
-            raise ValueError("Saved recipe not found")
+            raise ValueError("저장된 레시피를 찾을 수 없습니다")
 
         _save_store(store)
 
@@ -264,7 +264,7 @@ def clear_user_recipe_checklist(user_id: str, recipe_id: str) -> dict[str, Any]:
         store = _load_store()
         user = _find_user_by_id(store, user_id)
         if not user:
-            raise ValueError("User not found")
+            raise ValueError("사용자를 찾을 수 없습니다")
 
         for recipe in user.get("recipes", []):
             if recipe.get("id") == recipe_id:
@@ -272,7 +272,7 @@ def clear_user_recipe_checklist(user_id: str, recipe_id: str) -> dict[str, Any]:
                 _save_store(store)
                 return deepcopy(recipe)
 
-    raise ValueError("Saved recipe not found")
+    raise ValueError("저장된 레시피를 찾을 수 없습니다")
 
 
 def clear_session(token: str) -> None:

@@ -9,12 +9,11 @@ from raw text.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from importlib import import_module
 from typing import Any
-
-from pydantic import ValidationError
 
 from app.config import settings
 from app.schemas.recipe import RecipeResponse
@@ -23,7 +22,7 @@ _JSON_RE = re.compile(r"\{.*\}", flags=re.DOTALL)
 
 
 def _build_recipe_prompt(ingredient: str) -> str:
-        return f"""
+    return f"""
 당신은 전문 요리사입니다. 사용자가 '{ingredient}'(을)를 입력했습니다.
 이 재료를 메인으로 활용한 맛있고 실용적인 요리 레시피를 한국어로 작성해주세요.
 
@@ -76,10 +75,18 @@ def _response_text(response: Any) -> str:
 
 
 def _get_gemini_recipe(ingredient: str) -> dict:
-    genai = import_module("google.generativeai")
-    api_key = settings.LLM_API_KEY
+    try:
+        genai = import_module("google.generativeai")
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "Gemini provider requires 'google-generativeai'. Install it with 'pip install google-generativeai'."
+        ) from exc
+
+    api_key = settings.LLM_API_KEY or settings.GOOGLE_API_KEY or os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        raise ValueError("LLM_API_KEY is required for the Gemini provider")
+        raise ValueError(
+            "Gemini API key is missing. Set LLM_API_KEY (or GOOGLE_API_KEY) in your .env file."
+        )
 
     genai.configure(api_key=api_key)
     model_name = getattr(settings, "LLM_MODEL", None) or "gemini-2.5-flash"

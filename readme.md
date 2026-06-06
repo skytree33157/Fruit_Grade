@@ -175,6 +175,8 @@ uvicorn app.main:app --reload
 - 청과의 사진을 찍을 때에는 청과가 화면에 꽉 차 있게 찍으면 잘 인식되지 않습니다.
 - 여러 개의 청과의 사진을 한 번에 찍을 때에는 가급적 겹치지 않게 해야 잘 인식됩니다.
 
-## reference
+## Reference
 
 - 데이터셋 `068.농산물 품질(QC) 이미지`는 이 [링크](https://aihub.or.kr/aihubdata/data/view.do?pageIndex=5&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&srchDataRealmCode=REALM004&aihubDataSe=data&dataSetSn=149)에서 다운받을 수 있습니다.
+- fruit_grade_resnet101.pth는 이 [링크](https://drive.google.com/file/d/1DfSR9NIixeF9Uiw86fb5zEHPB1bFpOBW/view?usp=drive_link)에서 다운받을 수 있습니다.
+- crop_classifier_resnet101.pth는 이 [링크](https://drive.google.com/file/d/10_CdZNM0q0AErk0Qxvz3eECr2YYi4mv8/view?usp=drive_link)에서 다운받을 수 있습니다.

@@ -43,6 +43,7 @@ const openLoginBtn = document.getElementById("openLoginBtn");
 const signupForm = document.getElementById("signupForm");
 const loginForm = document.getElementById("loginForm");
 const cameraInput = document.getElementById("cameraInput");
+const fabContainer = document.getElementById("fabContainer");
 const fabMain = document.getElementById("fabMain");
 const fabActions = document.getElementById("fabActions");
 const fabCamera = document.getElementById("fabCamera");
@@ -90,6 +91,21 @@ const displayNameMap = {
   pear: "배",
   chinese_cabbage: "배추",
   radish: "무",
+};
+
+const recommendedDailyMap = {
+  apple: "1",
+  potato: "1-2",
+  cabbage: "0.25",
+  onion_white: "0.5",
+  onion_red: "0.5",
+  garlic: "3",
+  onjumilgam: "1~2",
+  hallabong: "1",
+  persimmon: "1",
+  pear: "0.5",
+  chinese_cabbage: "0.1",
+  radish: "0.5",
 };
 
 function displayCropName(rawName) {
@@ -591,13 +607,20 @@ function openModal(item) {
   modal.classList.remove("hidden");
   recipeSection.classList.add("hidden");
 
-  const rawTitle = item.crop_name || item.detector_class_name || "Unknown crop";
-  modalTitle.textContent = rawTitle;
-
+  const rawTitle = item.crop_name || item.detector_class_name || "알 수 없는 작물";
+  modalTitle.textContent = displayCropName(rawTitle);
   const confidence = Number(item.grade_confidence || 0);
+  const keyForRec = String(item.crop_name || item.detector_class_name || "")
+    .toLowerCase()
+    .replace(/-/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+  const rec = recommendedDailyMap[keyForRec] || "-";
+  const recLabel = rec === "-" ? "-" : `${rec}개`;
+
   modalContent.innerHTML = `
     <div class="modal-meta">
-      <span class="meta-chip">이름: ${displayCropName(item.crop_name || item.detector_class_name)}</span>
+      <span class="meta-chip">하루 권장 섭취량: ${recLabel}</span>
       <span class="meta-chip">등급: ${item.grade || "?"} (${item.grade_label_kr || "-"})</span>
       <span class="meta-chip">신뢰도: ${(confidence * 100).toFixed(1)}%</span>
     </div>
@@ -940,8 +963,9 @@ modalBackdrop.addEventListener("click", closeModalView);
 // Floating action button behavior (mobile)
 if (fabMain) {
   fabMain.addEventListener("click", () => {
-    if (!fabActions) return;
-    fabActions.classList.toggle("hidden");
+    if (!fabContainer || !fabActions) return;
+    const isOpen = fabContainer.classList.toggle("fab-open");
+    fabActions.setAttribute("aria-hidden", String(!isOpen));
   });
 }
 
@@ -958,7 +982,7 @@ if (cameraInput) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
     // close FAB actions after action
-    if (fabActions) fabActions.classList.add("hidden");
+    if (fabContainer) fabContainer.classList.remove("fab-open");
     await analyzeFile(file);
   });
 }
@@ -968,7 +992,7 @@ if (fabFolder) {
     // trigger existing file input (folder picker)
     if (!input) return;
     input.click();
-    if (fabActions) fabActions.classList.add("hidden");
+    if (fabContainer) fabContainer.classList.remove("fab-open");
   });
 }
 

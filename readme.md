@@ -19,24 +19,24 @@ Fruit Grade는 **사진 속 청과**를 **감지**하고, 청과 **종류와 등
 ## 사용 방법
 
 1. 홈 화면에서 이미지를 업로드합니다. 모바일 환경에서는 카메라 촬영 또한 가능합니다.
-<img src="readme_img/home.jpg" width="50%">
-
+<img src="readme_img/home.jpg" width="75%">
+<img src="readme_img/mobile.jpg" width="75%">
 
 2. 서버가 이미지에서 청과 객체를 검출하고, 각 객체에 대한 박스를 화면에 표시합니다.
-<img src="readme_img/analyze.jpg" width="50%">
+<img src="readme_img/analyze.jpg" width="75%">
 
-3. 박스를 클릭하면 해당 청과의 이름과 등급을 보여주는 팝업이 열립니다.
-<img src="readme_img/popup.jpg" width="50%">
+3. 박스를 클릭하면 해당 청과의 이름, 하루 권장 섭취량과 등급을 보여주는 팝업이 열립니다.
+<img src="readme_img/popup.jpg" width="75%">
 
 4. 팝업에서 싱싱한 청과를 고르는 팁을 확인하거나, 추천 레시피를 요청할 수 있습니다.
-<img src="readme_img/tip.jpg" width="50%">
-<img src="readme_img/recipe.jpg" width="50%">
+<img src="readme_img/tip.jpg" width="75%">
+<img src="readme_img/recipe.jpg" width="75%">
 
 5. 마음에 드는 레시피는 확정해서 저장하고, 홈 화면의 레시피 리스트에서 다시 열어보거나 삭제할 수 있습니다.
-<img src="readme_img/list.jpg" width="50%">
+<img src="readme_img/list.jpg" width="75%">
 
 6. 저장된 레시피를 클릭하면 재료 체크리스트와 조리 순서를 확인할 수 있습니다.
-<img src="readme_img/checklist.jpg" width="50%">
+<img src="readme_img/checklist.jpg" width="75%">
 
 ## API 개요
 
@@ -61,20 +61,20 @@ Fruit Grade는 **사진 속 청과**를 **감지**하고, 청과 **종류와 등
 ## 모델 및 데이터
 
 - `yolov8n.pt`: 객체 검출 기본 모델
-- `crop_classifier_resnet18.pth`: 청과 **종류** 분류 체크포인트 기본값
-- `fruit_grade_resnet18.pth`: 청과 **등급** 분류 체크포인트 기본값
+- `crop_classifier_resnet101.pth`: 청과 **종류** 분류 체크포인트 기본값
+- `fruit_grade_resnet101.pth`: 청과 **등급** 분류 체크포인트 기본값
 - `068.농산물 품질(QC) 이미지/`: 학습 데이터셋 폴더
 
 ## 데이터 준비 및 학습 과정
 
 ### 1. Roboflow 데이터 준비와 라벨링
 
-한 이미지 안에 여러 개의 청과가 함께 있는 경우를 정확하게 학습시키기 위해 **Roboflow**를 이용해 **인스턴스 분할** 방식으로 라벨링했습니다. 객체가 겹치거나 크기가 서로 다른 경우에도 각 청과의 영역을 세밀하게 구분할 수 있어서, 단순한 박스 라벨보다 더 안정적인 데이터셋을 만들 수 있었습니다.
+068.농산물 품질(QC) 이미지 데이터 셋으로는 한 이미지 안에 여러 개의 청과가 함께 있는 경우 각 객체를 개별로 식별하기 어려웠습니다. 이를 정확하게 학습시키기 위해 **Roboflow**를 이용해 **인스턴스 분할** 방식으로 라벨링했습니다. 객체가 겹치거나 크기가 서로 다른 경우에도 각 청과의 영역을 세밀하게 구분할 수 있어서, 단순한 박스 라벨보다 더 안정적인 데이터셋을 만들 수 있었습니다.
 
 #### 프로젝트 생성 및 데이터 업로드
 
 - Roboflow에서 새 프로젝트를 만들고, 작업 유형은 인스턴스 분할로 설정했습니다.
-- 준비된 이미지 파일을 업로드했습니다.
+- 068.농산물 품질(QC) 이미지 데이터셋을 참고하여 이미지를 업로드했습니다.
 
 #### 라벨링 작업
 
@@ -85,7 +85,7 @@ Fruit Grade는 **사진 속 청과**를 **감지**하고, 청과 **종류와 등
 #### 검수
 
 - 라벨링이 끝난 뒤에는 각 이미지의 마스크와 클래스가 올바른지 직접 확인했습니다.
-- 잘못 표시된 영역이나 누락된 객체는 **승인 또는 반려**로 정리해 품질을 확보했습니다.
+- 잘못 표시된 영역이나 누락된 객체는 **승인 또는 거절**로 정리해 품질을 확보했습니다.
 
 #### 전처리 및 데이터 증강
 
@@ -140,8 +140,8 @@ pip install -r requirements.txt
 
 ```env
 YOLO_MODEL_PATH=yolov8n.pt
-CROP_CHECKPOINT=crop_classifier_resnet18.pth
-RESNET_CHECKPOINT=fruit_grade_resnet18.pth
+CROP_CHECKPOINT=crop_classifier_resnet101.pth
+RESNET_CHECKPOINT=fruit_grade_resnet101.pth
 LLM_PROVIDER=gemini
 LLM_API_KEY=your_api_key
 LLM_MODEL=gemini-2.5-flash
@@ -167,11 +167,14 @@ uvicorn app.main:app --reload
 - `train_yolo.py`: 객체 검출 모델 학습
 - `train_crop_classifier.py`: 작물 분류 모델 학습
 
-## 개발 참고
+## 주의사항
 
 - 로그인한 사용자의 레시피와 체크리스트는 파일 기반 저장소에 보존됩니다.
 - 모델 경로를 바꿨다면 `.env`와 실제 파일 존재 여부를 함께 확인하는 것이 좋습니다.
+- 068.농산물 품질(QC) 이미지 데이터 셋은 사과, 배, 밀감, 한라봉, 마늘, 양파, 적양파, 양배추, 배추, 무, 감자, 감 총 12개의 청과에 대해 다루고 있으므로, 이 데이터 셋을 사용한 해당 프로젝트 역시 12개의 청과 밖에 인식하지 못합니다.
+- 청과의 사진을 찍을 때에는 청과가 화면에 꽉 차 있게 찍으면 잘 인식되지 않습니다.
+- 여러 개의 청과의 사진을 한 번에 찍을 때에는 가급적 겹치지 않게 해야 잘 인식됩니다.
 
-## 참고
+## reference
 
 - 데이터셋 `068.농산물 품질(QC) 이미지`는 이 [링크](https://aihub.or.kr/aihubdata/data/view.do?pageIndex=5&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&srchDataRealmCode=REALM004&aihubDataSe=data&dataSetSn=149)에서 다운받을 수 있습니다.

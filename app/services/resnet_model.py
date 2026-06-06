@@ -1,4 +1,4 @@
-"""Shared ResNet18 checkpoint loading and inference helpers."""
+"""Shared ResNet101 checkpoint loading and inference helpers."""
 
 from __future__ import annotations
 
@@ -63,9 +63,7 @@ class ResNetPrediction:
 class ResNetPredictor:
     def __init__(self, checkpoint_path: str) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        ckpt_path = Path(checkpoint_path)
-        if not ckpt_path.exists():
-            raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+        ckpt_path = self._resolve_checkpoint_path(Path(checkpoint_path))
 
         ckpt = torch.load(ckpt_path, map_location=self.device)
         self.classes = ckpt["classes"]
@@ -79,6 +77,26 @@ class ResNetPredictor:
         self.model.load_state_dict(ckpt["weights"])
         self.model = self.model.to(self.device)
         self.model.eval()
+
+    @staticmethod
+    def _resolve_checkpoint_path(requested_path: Path) -> Path:
+        if requested_path.exists():
+            return requested_path
+
+        alternatives = []
+        path_text = str(requested_path)
+        if "resnet18" in path_text:
+            alternatives.append(Path(path_text.replace("resnet18", "resnet101")))
+        if requested_path.name == "crop_classifier_resnet18.pth":
+            alternatives.append(requested_path.with_name("crop_classifier_resnet101.pth"))
+        if requested_path.name == "fruit_grade_resnet18.pth":
+            alternatives.append(requested_path.with_name("fruit_grade_resnet101.pth"))
+
+        for candidate in alternatives:
+            if candidate.exists():
+                return candidate
+
+        raise FileNotFoundError(f"Checkpoint not found: {requested_path}")
 
     @torch.no_grad()
     def predict_pil(self, image: Image.Image) -> ResNetPrediction:

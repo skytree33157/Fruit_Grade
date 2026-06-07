@@ -180,3 +180,4 @@ uvicorn app.main:app --reload
 - 데이터셋 `068.농산물 품질(QC) 이미지`는 이 [링크](https://aihub.or.kr/aihubdata/data/view.do?pageIndex=5&currMenu=115&topMenu=100&srchOptnCnd=OPTNCND001&searchKeyword=&srchDetailCnd=DETAILCND001&srchOrder=ORDER001&srchPagePer=20&srchDataRealmCode=REALM004&aihubDataSe=data&dataSetSn=149)에서 다운받을 수 있습니다.
 - fruit_grade_resnet101.pth는 이 [링크](https://drive.google.com/file/d/1DfSR9NIixeF9Uiw86fb5zEHPB1bFpOBW/view?usp=drive_link)에서 다운받을 수 있습니다.
 - crop_classifier_resnet101.pth는 이 [링크](https://drive.google.com/file/d/10_CdZNM0q0AErk0Qxvz3eECr2YYi4mv8/view?usp=drive_link)에서 다운받을 수 있습니다.
+- yolov8n.pt는 이 [링크](https://drive.google.com/file/d/19_SxA7LDDAlohpJZ5qJQe-fxPky7Lzmc/view?usp=sharing)에서 다운받을 수 있습니다.
